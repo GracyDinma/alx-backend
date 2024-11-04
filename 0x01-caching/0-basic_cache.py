@@ -18,16 +18,34 @@ BaseCaching = __import__('base_caching').BaseCaching
 
 
 class BasicCache(BaseCaching):
+    """BasicCache implements a simple caching system without
+    limits."""
+
     def put(self, key, item):
         """Assigns to the dictionary self.cache_data the item
         value for the key.
+
+        Args:
+            key: The key under which the item is stored.
+            item: The item to be stored in the cache.
+
+        if key or item is None, this method does not do anything.
         """
+
         if key is not None and item is not None:
             self.cache_data[key] = item
 
     def get(self, key):
-        """Returns the value in self.cache_data linked to key.
+        """Retrieve an item from the cache.
+
+        Args:
+            key: The key of the item to retrieve.
+            
+        Returns:
+            The value in self.cache_data linked to key.
+            or None if key is None or does not exist.
         """
+
         if key is None or key not in self.cache_data:
             return None
         return self.cache_data[key]
