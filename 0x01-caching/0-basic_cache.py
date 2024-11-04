@@ -40,7 +40,8 @@ class BasicCache(BaseCaching):
 
         Args:
             key: The key of the item to retrieve.
-            Returns:
+
+        Returns:
             The value in self.cache_data linked to key.
             or None if key is None or does not exist.
         """

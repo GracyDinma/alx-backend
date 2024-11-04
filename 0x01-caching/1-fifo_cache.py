@@ -19,6 +19,8 @@ BaseCaching = __import__('base_caching').BaseCaching
 
 
 class FIFOCache(BaseCaching):
+    """FIFOCache implements a FIFO caching system."""
+
     def __init__(self):
         """Initialize the FIFO cache and call the parent init.
         """
@@ -28,6 +30,14 @@ class FIFOCache(BaseCaching):
     def put(self, key, item):
         """Assigns to the dictionary self.cache_data the item
         value for the key key.
+
+        Args:
+            key: The key under which the item is stored.
+            items: The item to be stored in the cache.
+
+        if key or item is NOne, this method does not do anything.
+        if adding this item exceeds MAX_ITEMS,
+        the first item added is discarded.
         """
         if key is not None and item is not None:
             if key not in self.cache_data:
@@ -40,7 +50,13 @@ class FIFOCache(BaseCaching):
                 print(f"DISCARD: {oldest_key}")
 
     def get(self, key):
-        """Returns the value in self.cache_data linked to key.
+        """Retrieve an item from the cache.
+
+        Args:
+            key: The key of the item to retrieve.
+
+        Returns: The value in self.cache_data linked to key.
+        or None if key is None or does not exist.
         """
         if key is None or key not in self.cache_data:
             return None
