@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""A basic Flask web app serves a simple HTML page."""
+"""A basic Flask web app serves a simple HTML page.
+"""
+
 
 from flask import Flask, render_template
 
@@ -8,8 +10,9 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def index():
-    """Render the index page."""
+def hello_world():
+    """Render the index page.
+    """
     return render_template('0-index.html')
 
 
