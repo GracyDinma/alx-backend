@@ -1,30 +1,24 @@
 #!/usr/bin/env python3
-# Setting up a basic flask app.
-from flask import Flask, render_template, request, g
-from flask_babel import Babel, gettext
+"""A Basic Flask app with internationalization support.
+"""
 import pytz
-from datetime import datetime
-from pytz import UnknownTimeZoneError
+from typing import Union, Dict
+from flask_babel import Babel, format_datetime
+from flask import Flask, render_template, request, g
 
 
-# flask constructor
+class Config:
+    """Represents a Flask Babel configuration.
+    """
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+
+
 app = Flask(__name__)
-
-
-# config class to store language and timezone
-class config:
-    # Setting languages
-    LANGUAGES = ['en', 'fr']
-    DEFAULT_TIMEZONE = 'UTC'
-
-
-# Set up app's configuration with config class
-app.config.from_object(config)
-
-# Instantiate the Babel object
+app.config.from_object(Config)
+app.url_map.strict_slashes = False
 babel = Babel(app)
-
-# Mock user database
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -33,54 +27,64 @@ users = {
 }
 
 
-# Define the get_user function to fetch a user from the mock "database"
-def get_user():
-    user_id = request.args.get('login_as', type=int)
-    if user_id in users:
-        return users[user_id]
+def get_user() -> Union[Dict, None]:
+    """Retrieves a user based on a user id.
+    """
+    login_id = request.args.get('login_as', '')
+    if login_id:
+        return users.get(int(login_id), None)
     return None
 
-# Function to get timezone (with validation)
-@babel.timezoneselector
-def get_timezone():
-    return request.args.get('timezone', 'UTC')
 
-
-# Function to get the current time in the correct timezone
-def get_current_time():
-    # Get the timezone from the get_timezone function
-    timezone = get_timezone()
-    try:
-        tz = pytz.timezone(timezone)
-        local_time = datetime.now(tz)
-        return local_time.strftime('%b %d, %Y, %I:%M:%S %p')
-    except pytz.UnknownTimeZoneError:
-        return datetime.now(pytz.utc).strftime('%b %d, %Y, %I:%M:%S %p')
-
-
-# Make the function available globally in jinja template
-app.jinja_env.globals.update(get_current_time=get_current_time)
-
-
-# Define the before_request function to set the user globally using flask.g
 @app.before_request
-def before_request():
+def before_request() -> None:
+    """Performs some routines before each request's resolution.
+    """
     user = get_user()
     g.user = user
 
 
-# Context Processor to make get_timezone globally available
-@app.context_processor
-def inject_timezone():
-    return dict(get_timezone=get_timezone)
+@babel.localeselector
+def get_locale() -> str:
+    """Retrieves the locale for a web page.
+    """
+    queries = request.query_string.decode('utf-8').split('&')
+    query_table = dict(map(
+        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
+        queries,
+    ))
+    locale = query_table.get('locale', '')
+    if locale in app.config["LANGUAGES"]:
+        return locale
+    user_details = getattr(g, 'user', None)
+    if user_details and user_details['locale'] in app.config["LANGUAGES"]:
+        return user_details['locale']
+    header_locale = request.headers.get('locale', '')
+    if header_locale in app.config["LANGUAGES"]:
+        return header_locale
+    return app.config['BABEL_DEFAULT_LOCALE']
 
 
-# Define a route for the root URL
+@babel.timezoneselector
+def get_timezone() -> str:
+    """Retrieves the timezone for a web page.
+    """
+    timezone = request.args.get('timezone', '').strip()
+    if not timezone and g.user:
+        timezone = g.user['timezone']
+    try:
+        return pytz.timezone(timezone).zone
+    except pytz.exceptions.UnknownTimeZoneError:
+        return app.config['BABEL_DEFAULT_TIMEZONE']
+
+
 @app.route('/')
-def index():
+def get_index() -> str:
+    """The home/index page.
+    """
+    g.time = format_datetime()
     return render_template('index.html')
 
 
-# Running the application
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
