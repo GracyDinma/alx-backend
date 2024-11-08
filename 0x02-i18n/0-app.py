@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-# Setting up a baaaaasic flask app.
+"""A basic Flask web app serves a simple HTML page."""
+
 from flask import Flask, render_template
 
-# flask constructor
+# Create an instance of the flask class
 app = Flask(__name__)
-
-# route() function tells the application to render
-# index.html template.
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Render the index page."""
+    return render_template('0-index.html')
 
 
-# Running the application
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Run the Flask application
+    app.run(host='0.0.0.0', port=5000, debug=True)
