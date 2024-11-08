@@ -1,37 +1,31 @@
 #!/usr/bin/env python3
-"""A basic Flask web app serves a simple HTML page.
-"""
-
+'''Task 0: Basic Flask app
+'''
 
 from flask import Flask, render_template
 from flask_babel import Babel
 
 
-# config class to store language and timezone
-class config:
-    """_summary_
+class Config:
+    '''Config class'''
 
-    Returns:
-        _type_:_description_
-    """
-    LANGUAGES = ['en', 'fr']
-    DEFAULT_LOCALE = 'en'
-    DEFAULT_TIMEZONE = 'UTC'
+    LANGUAGES = ["en", "fr"]
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
 
 
-# flask constructor
 app = Flask(__name__)
-app.config.from_object(config)
+app.config.from_object(Config)
+app.url_map.strict_slashes = False
+
 babel = Babel(app)
 
 
 @app.route('/')
 def index():
-    """Render the index page.
-    """
-    return render_template('1-index.html')
+    '''default route'''
+    return render_template("1-index.html",)
 
 
-if __name__ == '__main__':
-    # Run the Flask application
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
