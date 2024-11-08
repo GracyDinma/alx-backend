@@ -22,11 +22,12 @@ class config:
 # configure the flask app
 app = Flask(__name__)
 app.config.from_object(config)
+app.url_map.strict_slashes = False
 babel = Babel(app)
 
 
 @babel.localeselector
-def get_locale():
+def get_locale() -> str:
     """_summary_
 
     Returns:
@@ -36,9 +37,11 @@ def get_locale():
 
 
 @app.route('/')
-def index():
-    """
-        _summary_
+def index() -> str:
+    """default route
+
+    Returns:
+        html: homepage
     """
     return render_template('2-index.html')
 
